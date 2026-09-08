@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 import java.math.BigDecimal;
 
 @Entity
-public class Worker extends User {
+public class Worker extends Employee {
 
     @Column(name = "pay_rate")
     private BigDecimal payRate;

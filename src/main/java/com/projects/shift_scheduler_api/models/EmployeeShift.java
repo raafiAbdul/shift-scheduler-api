@@ -7,18 +7,21 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "employee_shift")
-public class UserShift {
+public class EmployeeShift {
     @EmbeddedId
-    private UserShiftKey id;
+    private EmployeeShiftKey id;
 
     @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "user_fk"))
-    private User user;
+    @MapsId("employeeId")
+    @JoinColumn(name = "employee_id", foreignKey = @ForeignKey(name = "employee_fk"))
+    private Employee employee;
 
     @ManyToOne
     @MapsId("shiftId")
-    @JoinColumn(name = "shift_id", foreignKey = @ForeignKey(name = "shift_fk"))
+    @JoinColumn(name = "shift_id", foreignKey = @ForeignKey(
+            name = "shift_fk",
+            foreignKeyDefinition = "foreign key (employee_id) references employees(id) on delete cascade"
+    ))
     private Shift shift;
 
     @Column(name = "clocked_in")
@@ -28,18 +31,25 @@ public class UserShift {
     private OffsetDateTime clockedOut;
 
     @Column(name = "hours_worked")
-    private double hoursWorked;
+    private double hoursWorked = 0;
 
-    public UserShiftKey getId() {
+    public EmployeeShift() {
+    }
+
+    public EmployeeShift(EmployeeShiftKey id) {
+        this.id = id;
+    }
+
+    public EmployeeShiftKey getId() {
         return id;
     }
 
-    public User getUser() {
-        return user;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     public Shift getShift() {
@@ -72,5 +82,21 @@ public class UserShift {
 
     public void setHoursWorked(double hoursWorked) {
         this.hoursWorked = hoursWorked;
+    }
+
+    public void setId(EmployeeShiftKey id) {
+        this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        EmployeeShift that = (EmployeeShift) o;
+        return Objects.equals(this.id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

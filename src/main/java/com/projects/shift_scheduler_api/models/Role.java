@@ -11,14 +11,22 @@ public enum Role {
             Permissions.USER_READ,
             Permissions.USER_WRITE,
             Permissions.USER_UPDATE,
-            Permissions.USER_DELETE
+            Permissions.USER_DELETE,
+            Permissions.USER_UPDATE_CONTACT,
+            Permissions.USER_READ_SELF,
+            Permissions.WORKER_UPDATE_NONCONTACT,
+            Permissions.MANAGER_UPDATE_NONCONTACT,
+            Permissions.SHIFT_CLAIM,
+            Permissions.SHIFT_SWAP_REQUEST,
+            Permissions.USER_READ_BASIC_DETAILS
     )),
     WORKER(Set.of(
             Permissions.SHIFT_READ,
             Permissions.SHIFT_CLAIM,
             Permissions.SHIFT_SWAP_REQUEST,
             Permissions.USER_READ_SELF,
-            Permissions.USES_UPDATE_CONTACT
+            Permissions.USER_UPDATE_CONTACT,
+            Permissions.USER_READ_BASIC_DETAILS
     )),
     MANAGER(Set.of(
             Permissions.SHIFT_READ,
@@ -26,7 +34,8 @@ public enum Role {
             Permissions.SHIFT_UPDATE,
             Permissions.SHIFT_DELETE,
             Permissions.USER_READ,
-            Permissions.USER_UPDATE_NONCONTACT
+            Permissions.WORKER_UPDATE_NONCONTACT,
+            Permissions.USER_READ_BASIC_DETAILS
     ));
 
     private final Set<Permissions> permissions;

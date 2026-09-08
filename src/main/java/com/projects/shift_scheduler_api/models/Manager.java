@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import java.math.BigDecimal;
 
 @Entity
-public class Manager extends User {
+public class Manager extends Employee {
     private BigDecimal salary;
 
     public BigDecimal getSalary() {
