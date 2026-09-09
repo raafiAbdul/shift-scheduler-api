@@ -34,11 +34,6 @@ public class EmployeeController {
 
     }
 
-    @PostMapping("/logout")
-    public void logout() {
-
-    }
-
     @GetMapping("/{page}")
     public ResponseEntity<?> getAllEmployees(@PathVariable Integer page,
                                              @RequestParam(required = false) Integer size ) {

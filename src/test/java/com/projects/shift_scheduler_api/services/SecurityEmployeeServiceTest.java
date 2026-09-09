@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class EmployeeServiceTest extends InitializeServiceTest {
+class SecurityEmployeeServiceTest extends InitializeServiceTest {
     @Mock
     EmployeeRepository employeeRepository;
     @InjectMocks
