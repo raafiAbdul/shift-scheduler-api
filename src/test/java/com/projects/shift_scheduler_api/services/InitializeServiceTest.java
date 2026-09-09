@@ -2,6 +2,7 @@ package com.projects.shift_scheduler_api.services;
 
 import com.projects.shift_scheduler_api.dtos.CreateOrUpdateShiftDto;
 import com.projects.shift_scheduler_api.dtos.ShiftDateDto;
+import com.projects.shift_scheduler_api.dtos.StartAndEndTimeDto;
 import com.projects.shift_scheduler_api.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,9 +22,9 @@ class InitializeServiceTest {
     public static Shift s1, s2, s3, s4;
     public static CreateOrUpdateShiftDto createDto;
     public static Shift newShift;
-    public static ShiftDateDto[]
-            startAndEnd = new ShiftDateDto[2],
-            endLargerThanStart = new ShiftDateDto[2];
+    public static StartAndEndTimeDto
+            startAndEnd = new StartAndEndTimeDto(),
+            endLargerThanStart = new StartAndEndTimeDto();
 
     @BeforeEach
     void setUpMockData() {
@@ -123,11 +124,11 @@ class InitializeServiceTest {
         createDto.setEndTime(new ShiftDateDto(9, 7, 17, 0));
         newShift = mapCreateUpdateDtoToShift(createDto);
 
-        startAndEnd[0] = new ShiftDateDto(9, 7, 8, 0);
-        startAndEnd[1] = new ShiftDateDto(9, 7, 17, 0);
+        startAndEnd.setStartTime(new ShiftDateDto(9, 7, 8, 0));
+        startAndEnd.setEndTime(new ShiftDateDto(9, 7, 17, 0));
 
-        endLargerThanStart[0] = new ShiftDateDto(9, 7, 17, 0);
-        endLargerThanStart[1] = new ShiftDateDto(9, 7, 8, 0);
+        endLargerThanStart.setStartTime(new ShiftDateDto(9, 7, 17, 0));
+        endLargerThanStart.setEndTime(new ShiftDateDto(9, 7, 8, 0));
     }
 
     private Shift mapCreateUpdateDtoToShift(CreateOrUpdateShiftDto createOrUpdateShiftDto) {

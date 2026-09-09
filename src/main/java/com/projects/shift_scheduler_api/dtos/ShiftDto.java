@@ -7,17 +7,14 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public class ShiftDto {
-    private long id;
-    private String description;
-    private int requiredEmployeesCount;
-    private OffsetDateTime startTime;
-    private OffsetDateTime endTime;
-    private ShiftState state;
-    private int currentEmployeeCount;
-    private List<EmployeeShift> employeeShifts;
-
-    public ShiftDto() {
-    }
+    private final long id;
+    private final String description;
+    private final int requiredEmployeesCount;
+    private final OffsetDateTime startTime;
+    private final OffsetDateTime endTime;
+    private final ShiftState state;
+    private final int currentEmployeeCount;
+    private final List<EmployeeShift> employeeShifts;
 
     public ShiftDto(long id, String description,
                     int requiredEmployeesCount,

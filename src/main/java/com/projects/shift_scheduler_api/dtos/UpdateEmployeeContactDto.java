@@ -4,9 +4,6 @@ import jakarta.validation.constraints.*;
 
 public class UpdateEmployeeContactDto {
 
-    @PositiveOrZero
-    private long id;
-
     @NotNull
     @NotBlank
     private String username;
@@ -18,14 +15,6 @@ public class UpdateEmployeeContactDto {
             message = "Please enter a valid email such as user@domain.com"
     )
     private String email;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;

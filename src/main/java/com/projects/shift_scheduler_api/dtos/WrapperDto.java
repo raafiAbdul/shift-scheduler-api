@@ -1,31 +1,25 @@
 package com.projects.shift_scheduler_api.dtos;
 
-public class WrapperDto<T> {
-    private T type;
-    private int status;
-    private String message;
+public final class WrapperDto<T> {
+    private final T data;
+    private final int status;
+    private final String message;
 
-    public T getType() {
-        return type;
+    public WrapperDto(T data, int status, String message) {
+        this.data = data;
+        this.status = status;
+        this.message = message;
     }
 
-    public void setType(T type) {
-        this.type = type;
+    public T getData() {
+        return data;
     }
 
     public int getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
     public String getMessage() {
         return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 }

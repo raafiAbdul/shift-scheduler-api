@@ -1,7 +1,6 @@
 package com.projects.shift_scheduler_api.services;
 
-import com.projects.shift_scheduler_api.dtos.BasicEmployeeDetailsDto;
-import com.projects.shift_scheduler_api.dtos.RegisterDto;
+import com.projects.shift_scheduler_api.dtos.*;
 import com.projects.shift_scheduler_api.models.Employee;
 import com.projects.shift_scheduler_api.models.Manager;
 import com.projects.shift_scheduler_api.models.Role;
@@ -27,23 +26,18 @@ class EmployeeServiceTest extends InitializeServiceTest {
     EmployeeService employeeService;
 
     @Test
-    void shouldReturn_TheSame_EmployeeUsernameAndEmail() {
-        when(employeeRepository.save(a1)).thenReturn(a1);
-        Employee e2 = employeeService.createEmployee(a1);
-        assertAll(
-                () -> assertEquals("alice_admin", e2.getUsername()),
-                () -> assertEquals("alice.admin@company.com", e2.getEmail())
-        );
-    }
-
-    @Test
     void shouldReturn_TheSame_ManagerUsernameAndEmail() {
         when(employeeRepository.save(m1)).thenReturn(m1);
         Manager m2 = employeeService.createManager(m1);
         assertAll(
                 () -> assertEquals("bob_manager", m2.getUsername()),
-                () -> assertEquals("bob.manager@company.com", m2.getEmail())
+                () -> assertEquals("bob.manager@company.com", m2.getEmail()),
+                () -> assertThrows(IllegalArgumentException.class, () -> {
+                    m1.setRole(Role.ADMIN);
+                    employeeService.createManager(m1);
+                })
         );
+        m1.setRole(Role.MANAGER);
     }
 
     @Test
@@ -52,8 +46,13 @@ class EmployeeServiceTest extends InitializeServiceTest {
         Worker w1_2 = employeeService.createWorker(w1);
         assertAll(
                 () -> assertEquals("carol_w", w1_2.getUsername()),
-                () -> assertEquals("carol_worker@company.com", w1_2.getEmail())
+                () -> assertEquals("carol_worker@company.com", w1_2.getEmail()),
+                () -> assertThrows(IllegalArgumentException.class, () -> {
+                    w1.setRole(Role.ADMIN);
+                    employeeService.createWorker(w1);
+                })
         );
+        w1.setRole(Role.MANAGER);
     }
 
     @Test
@@ -224,29 +223,11 @@ class EmployeeServiceTest extends InitializeServiceTest {
     }
 
     @Test
-    void findBasicDetails_deters_nullOrInvalidValues() {
-        when(employeeRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(new PageImpl<>(List.of(new Employee())));
-        employeeService.findBasicDetails(null, null);
-        verify(employeeRepository, times(1))
-                .findAll(PageRequest.of(0, 10));
-    }
-
-    @Test
-    void findBasicDetails_accepts_validValues() {
-        when(employeeRepository.findAll(PageRequest.of(15, 3)))
-                .thenReturn(new PageImpl<>(List.of(new Employee())));
-        employeeService.findBasicDetails(3, 15);
-        verify(employeeRepository, times(1))
-                .findAll(PageRequest.of(15, 3));
-    }
-
-    @Test
     void findByUser_validatesSizeAndPage() {
-        Integer size = null, page = -2;
+        Integer page = -2;
         when(employeeRepository.findAll(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(new Employee())));
-        employeeService.findAllBasic(page, size);
+        employeeService.findAllBasic(page, null);
         verify(employeeRepository, times(1))
                 .findAll(PageRequest.of(0, 10));
     }
@@ -276,4 +257,94 @@ class EmployeeServiceTest extends InitializeServiceTest {
         assertThrows(IllegalArgumentException.class, () ->
                 employeeService.findById(-3L));
     }
+
+    @Test
+    void updateEmployeeContact_happyFlow() {
+        Long id = 2L;
+        when(employeeRepository.findById(id)).thenReturn(Optional.of(a1));
+        when(employeeRepository.save(a1)).thenReturn(a1);
+        UpdateEmployeeContactDto contactDto = new UpdateEmployeeContactDto();
+
+        contactDto.setUsername(a1.getUsername());
+        contactDto.setEmail(a1.getEmail());
+
+        employeeService.updateEmployeeContact(contactDto, id);
+
+        verify(employeeRepository, times(1)).save(a1);
+    }
+
+    @Test
+    void updateEmployeeContact_errorFlows() {
+        UpdateEmployeeContactDto contactDto = new UpdateEmployeeContactDto();
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () ->
+                        employeeService.updateEmployeeContact(contactDto, null)),
+                () -> assertThrows(NoSuchElementException.class, () -> {
+                    when(employeeRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+                    employeeService.updateEmployeeContact(contactDto, 2L);
+                })
+        );
+    }
+
+    @Test
+    void updateWorkerNonContact_happyFlow() {
+        UpdateWorkerNonContactDto contactDto = new UpdateWorkerNonContactDto();
+        Long id = 1L;
+        when(employeeRepository.findById(id)).thenReturn(Optional.of(w1));
+        when(employeeRepository.save(w1)).thenReturn(w1);
+
+        employeeService.updateWorkerNonContact(contactDto, id);
+
+        verify(employeeRepository, times(1)).findById(id);
+        verify(employeeRepository, times(1)).save(w1);
+
+
+    }
+
+    @Test
+    void updateWorkerNonContact_errorFlows() {
+        UpdateWorkerNonContactDto contactDto = new UpdateWorkerNonContactDto();
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () ->
+                        employeeService.updateWorkerNonContact(contactDto, null)),
+                () -> assertThrows(NoSuchElementException.class, () -> {
+                    when(employeeRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+                    employeeService.updateWorkerNonContact(contactDto, 2L);
+                })
+        );
+    }
+
+    @Test
+    void updateManagerNonContact_happyFlow() {
+        UpdateManagerNonContactDto contactDto = new UpdateManagerNonContactDto();
+        Long id = 1L;
+        when(employeeRepository.findById(id)).thenReturn(Optional.of(m1));
+        when(employeeRepository.save(m1)).thenReturn(m1);
+
+        employeeService.updateManagerNonContact(contactDto, id);
+
+        verify(employeeRepository, times(1)).findById(id);
+        verify(employeeRepository, times(1)).save(w1);
+
+
+    }
+
+    @Test
+    void updateManagerNonContact_errorFlows() {
+        UpdateManagerNonContactDto contactDto = new UpdateManagerNonContactDto();
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () ->
+                        employeeService.updateManagerNonContact(contactDto, null)),
+                () -> assertThrows(NoSuchElementException.class, () -> {
+                    when(employeeRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+                    employeeService.updateManagerNonContact(contactDto, 2L);
+                })
+        );
+    }
+
+
+
 }

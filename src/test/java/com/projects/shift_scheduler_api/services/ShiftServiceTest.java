@@ -124,32 +124,56 @@ class ShiftServiceTest extends InitializeServiceTest {
     @Test
     void createShift_throwsIllegalStateException() {
         createDto.setEndTime(new ShiftDateDto(6, 3, 15, 30));
-        Long id = 2L;
-
-        when(shiftRepository.findById(id)).thenReturn(Optional.of(newShift));
-
         assertThrows(IllegalStateException.class, () ->
-            shiftService.updateShift(id, createDto));
+                shiftService.createShift(createDto));
+        startAndEnd.setEndTime(new ShiftDateDto(9, 7, 17, 0));
     }
 
     @Test
-    void createShift_ThrowsIllegalArgumentException() {
-        createDto.setEndTime(new ShiftDateDto(6, 3, 15, 30));
-        Long id = -2L;
-
+    void createShift_throwsIllegalArgumentException() {
+        createDto.setEndTime(new ShiftDateDto(10, 3, 15, 30));
         assertThrows(IllegalArgumentException.class, () ->
-            shiftService.updateShift(id, createDto));
+                shiftService.createShift(createDto));
+        startAndEnd.setEndTime(new ShiftDateDto(9, 7, 17, 0));
     }
 
     @Test
-    void createShift_ThrowsIllegalStateException() {
+    void updateShift_throwsIllegalStateExceptions() {
         Long id = 2L;
-        newShift.setState(ShiftState.CLOSED);
         when(shiftRepository.findById(id)).thenReturn(Optional.of(newShift));
 
-        assertThrows(IllegalStateException.class, () ->
-            shiftService.updateShift(id, createDto));
+        assertAll(
+                // throws "Can't start shift after it's ended"
+                () -> assertThrows(IllegalStateException.class, () -> {
+                            createDto.setEndTime(new ShiftDateDto(6, 3, 15, 30));
+                            shiftService.updateShift(id, createDto);
+                        }),
 
+                // throws "Shift has already closed"
+                () -> assertThrows(IllegalStateException.class, () -> {
+                        newShift.setState(ShiftState.CLOSED);
+                        shiftService.updateShift(id, createDto);
+                        createDto.setState(ShiftState.UPCOMING);
+                })
+        );
+        startAndEnd.setEndTime(new ShiftDateDto(9, 7, 17, 0));
+    }
+
+    @Test
+    void updateShift_ThrowsIllegalArgumentException() {
+        createDto.setEndTime(new ShiftDateDto(10, 3, 15, 30));
+        createDto.setState(ShiftState.UPCOMING);
+        Long id = -2L, id2 = 2L;
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () ->
+                        shiftService.updateShift(id, createDto)),
+                () -> assertThrows(IllegalArgumentException.class, () -> {
+                        when(shiftRepository.findById(id2)).thenReturn(Optional.of(newShift));
+                        shiftService.updateShift(id2, createDto);
+                })
+        );
+        startAndEnd.setEndTime(new ShiftDateDto(9, 7, 17, 0));
     }
 
     @Test
@@ -225,8 +249,8 @@ class ShiftServiceTest extends InitializeServiceTest {
     @Test
     void findByTimeInBetween_happyFlow() {
         int page = 3, size = 5;
-        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(startAndEnd[0]);
-        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(startAndEnd[1]);
+        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(startAndEnd.getStartTime());
+        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(startAndEnd.getEndTime());
 
         when(shiftRepository.findByTimeInBetween(startTime, endTime,
                 PageRequest.of(page, size))).thenReturn(new PageImpl<>(List.of(s3)));
@@ -236,13 +260,6 @@ class ShiftServiceTest extends InitializeServiceTest {
         verify(shiftRepository, times(1)).findByTimeInBetween(
                 startTime, endTime, PageRequest.of(page, size)
         );
-    }
-
-    @Test
-    void findByTimeInBetween_throwsIllegalArgumentException() {
-        int page = 3, size = 5;
-        assertThrows(IllegalArgumentException.class, () ->
-                shiftService.findByTimeInBetween(new ShiftDateDto[3], size, page));
     }
 
     @Test

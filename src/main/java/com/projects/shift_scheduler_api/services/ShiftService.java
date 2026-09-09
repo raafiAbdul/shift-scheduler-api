@@ -3,6 +3,7 @@ package com.projects.shift_scheduler_api.services;
 import com.projects.shift_scheduler_api.dtos.CreateOrUpdateShiftDto;
 import com.projects.shift_scheduler_api.dtos.ShiftDateDto;
 import com.projects.shift_scheduler_api.dtos.ShiftDto;
+import com.projects.shift_scheduler_api.dtos.StartAndEndTimeDto;
 import com.projects.shift_scheduler_api.models.Employee;
 import com.projects.shift_scheduler_api.models.Shift;
 import com.projects.shift_scheduler_api.models.ShiftState;
@@ -64,19 +65,25 @@ public class ShiftService {
     }
 
     @Transactional
-    public ShiftDto createShift(@Valid CreateOrUpdateShiftDto createOrUpdateShiftDto) {
-        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(createOrUpdateShiftDto.getStartTime());
-        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(createOrUpdateShiftDto.getEndTime());
+    public ShiftDto createShift(@Valid CreateOrUpdateShiftDto createShiftDto) {
+        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(createShiftDto.getStartTime());
+        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(createShiftDto.getEndTime());
+        ShiftDateDto startTimeDto = createShiftDto.getStartTime(),
+                endTimeDto = createShiftDto.getEndTime();
+
+        if(ShiftDateDto.differenceInHours(endTimeDto, startTimeDto) > 96.00) {
+            throw new IllegalArgumentException("Cannot have shift longer than 96 hours");
+        }
 
         if(startTime.isAfter(endTime))
             throw new IllegalStateException("Can't start shift after it's ended");
 
-        Shift newShift = mapCreateUpdateDtoToShift(createOrUpdateShiftDto);
+        Shift newShift = mapCreateUpdateDtoToShift(createShiftDto);
         return mapShiftToShiftDto(shiftRepository.save(newShift));
     }
 
     @Transactional
-    public ShiftDto updateShift(Long id, @Valid CreateOrUpdateShiftDto createOrUpdateShiftDto) {
+    public ShiftDto updateShift(Long id, @Valid CreateOrUpdateShiftDto updateShiftDto) {
         if(id == null || id < 0)
             throw new IllegalArgumentException("Null or invalid Id");
 
@@ -86,17 +93,21 @@ public class ShiftService {
         if(s.getState() == ShiftState.CLOSED)
             throw new IllegalStateException("Shift has already closed");
 
-        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(createOrUpdateShiftDto.getStartTime());
-        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(createOrUpdateShiftDto.getEndTime());
+        if(ShiftDateDto.differenceInHours(updateShiftDto.getEndTime(), updateShiftDto.getStartTime()) > 96.00) {
+            throw new IllegalArgumentException("Cannot have shift longer than 96 hours");
+        }
+
+        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(updateShiftDto.getStartTime());
+        OffsetDateTime endTime = mapShiftDateDtoToOffsetDateTime(updateShiftDto.getEndTime());
 
         if(startTime.isAfter(endTime))
             throw new IllegalStateException("Can't start shift after it's ended");
 
-        s.setRequiredEmployeesCount(createOrUpdateShiftDto.getRequiredEmployeeCount());
-        s.setDescription(createOrUpdateShiftDto.getDescription());
+        s.setRequiredEmployeesCount(updateShiftDto.getRequiredEmployeeCount());
+        s.setDescription(updateShiftDto.getDescription());
         s.setStartTime(startTime);
         s.setEndTime(endTime);
-        s.setState(createOrUpdateShiftDto.getState());
+        s.setState(updateShiftDto.getState());
 
         return mapShiftToShiftDto(shiftRepository.save(s));
     }
@@ -148,15 +159,12 @@ public class ShiftService {
         return shiftPage.map(this::mapShiftToShiftDto);
     }
 
-    public Page<ShiftDto> findByTimeInBetween(@Valid ShiftDateDto[] startAndEnd, Integer size, Integer page) {
+    public Page<ShiftDto> findByTimeInBetween(@Valid StartAndEndTimeDto startAndEnd, Integer size, Integer page) {
         size = (size == null || size <= 0) ? 10 : size;
         page = (page == null || page < 0) ? 0 : page;
 
-        if(startAndEnd.length != 2)
-            throw new IllegalArgumentException("Must contain no more or less than two values for the array");
-
-        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(startAndEnd[0]),
-                endTime = mapShiftDateDtoToOffsetDateTime(startAndEnd[1]);
+        OffsetDateTime startTime = mapShiftDateDtoToOffsetDateTime(startAndEnd.getStartTime()),
+                endTime = mapShiftDateDtoToOffsetDateTime(startAndEnd.getEndTime());
 
         if(startTime.isAfter(endTime))
             throw new IllegalStateException("Start time must be before end time");

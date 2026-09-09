@@ -10,9 +10,6 @@ import java.math.BigDecimal;
 
 public class UpdateManagerNonContactDto {
 
-    @PositiveOrZero
-    private long id;
-
     @NotNull
     private Role role;
 
@@ -34,14 +31,6 @@ public class UpdateManagerNonContactDto {
 
     public void setSalary(BigDecimal salary) {
         this.salary = salary;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public Role getRole() {

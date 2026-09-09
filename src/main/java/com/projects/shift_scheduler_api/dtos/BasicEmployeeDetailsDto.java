@@ -1,7 +1,11 @@
 package com.projects.shift_scheduler_api.dtos;
 
+import com.projects.shift_scheduler_api.models.Employee;
+import com.projects.shift_scheduler_api.models.Manager;
 import com.projects.shift_scheduler_api.models.Role;
+import com.projects.shift_scheduler_api.models.Worker;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class BasicEmployeeDetailsDto {
@@ -9,12 +13,37 @@ public class BasicEmployeeDetailsDto {
     private String position;
     private Role role;
     private LocalDate dateHired;
+    private BigDecimal payRate;
+    private BigDecimal salary;
 
-    public BasicEmployeeDetailsDto(String username, String position, Role role, LocalDate dateHired) {
-        this.username = username;
-        this.position = position;
-        this.role = role;
-        this.dateHired = dateHired;
+    public BasicEmployeeDetailsDto(Employee e) {
+        this.username = e.getUsername();
+        this.position = e.getPosition();
+        this.role = e.getRole();
+        this.dateHired = e.getDateHired();
+
+        if(e instanceof Worker w)
+            this.payRate = w.getPayRate();
+
+        if(e instanceof Manager m)
+            this.salary = m.getSalary();
+
+    }
+
+    public BigDecimal getPayRate() {
+        return payRate;
+    }
+
+    public void setPayRate(BigDecimal payRate) {
+        this.payRate = payRate;
+    }
+
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
     }
 
     public String getUsername() {

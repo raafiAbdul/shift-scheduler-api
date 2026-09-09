@@ -1,16 +1,26 @@
 package com.projects.shift_scheduler_api.dtos;
 
-public class ErrorDetailsDto<T> {
-    private T type;
-    private int status;
-    private String[] details;
+import java.time.OffsetDateTime;
 
-    public T getType() {
-        return type;
+public class ErrorDetailsDto<D> {
+    private String error;
+    private int status;
+    private D message;
+    private OffsetDateTime timestamp;
+
+    public ErrorDetailsDto(String error, int status, D message) {
+        this.error = error;
+        this.status = status;
+        this.message = message;
+        this.timestamp = OffsetDateTime.now();
     }
 
-    public void setType(T type) {
-        this.type = type;
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
     public int getStatus() {
@@ -21,11 +31,19 @@ public class ErrorDetailsDto<T> {
         this.status = status;
     }
 
-    public String[] getDetails() {
-        return details;
+    public D getMessage() {
+        return message;
     }
 
-    public void setDetails(String[] details) {
-        this.details = details;
+    public void setMessage(D message) {
+        this.message = message;
+    }
+
+    public OffsetDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

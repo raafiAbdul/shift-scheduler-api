@@ -1,8 +1,6 @@
 package com.projects.shift_scheduler_api.services;
 
-import com.projects.shift_scheduler_api.dtos.BasicEmployeeDetailsDto;
-import com.projects.shift_scheduler_api.dtos.CreateOrUpdateShiftDto;
-import com.projects.shift_scheduler_api.dtos.RegisterDto;
+import com.projects.shift_scheduler_api.dtos.*;
 import com.projects.shift_scheduler_api.models.Employee;
 import com.projects.shift_scheduler_api.models.Manager;
 import com.projects.shift_scheduler_api.models.Role;
@@ -26,17 +24,16 @@ public class EmployeeService {
     }
 
     @Transactional
-    public Employee createEmployee(@Valid Employee employee) {
-        return employeeRepository.save(employee);
-    }
-
-    @Transactional
     public Manager createManager(@Valid Manager manager) {
+        if(manager.getRole() == Role.ADMIN)
+            throw new IllegalArgumentException("Can't create another admin");
         return employeeRepository.save(manager);
     }
 
     @Transactional
     public Worker createWorker(@Valid Worker worker) {
+        if(worker.getRole() == Role.ADMIN)
+            throw new IllegalArgumentException("Can't create another admin");
         return employeeRepository.save(worker);
     }
 
@@ -117,14 +114,14 @@ public class EmployeeService {
         } else if(!employeeRepository.existsByUsername(username)) {
             throw new NoSuchElementException("No such username exists");
         }
-        return mapEmployeeToBasicEmployee(employeeRepository.findByUsername(username)
+        return mapEmployeeToBasicEmployee(employeeRepository.findByUsername(username.trim())
                 .orElseThrow(() -> new NoSuchElementException("No such employee with username " + username)));
     }
 
     public BasicEmployeeDetailsDto findByEmail(String email) {
         if(email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Null or blank email");
-        } else if(!employeeRepository.existsByEmail(email)) {
+        } else if(!employeeRepository.existsByEmail(email.trim())) {
             throw new NoSuchElementException("No such email exists");
         }
         return mapEmployeeToBasicEmployee(employeeRepository.findByEmail(email)
@@ -135,21 +132,12 @@ public class EmployeeService {
         size = (size == null || size <= 0) ? 10 : size;
         page = (page == null || page < 0) ? 0 : page;
 
-        if(role == null || role.isEmpty()) {
+        if(role == null || role.trim().isEmpty()) {
             throw new IllegalArgumentException("Null or empty role argument");
         }
-
         Page<Employee> employeePage = employeeRepository.findByRole(
-                role.toUpperCase(), PageRequest.of(page, size));
+                role.trim().toUpperCase(), PageRequest.of(page, size));
 
-        return employeePage.map(this::mapEmployeeToBasicEmployee);
-    }
-
-    public Page<BasicEmployeeDetailsDto> findBasicDetails(Integer size, Integer page) {
-        size = (size == null || size <= 0) ? 10 : size;
-        page = (page == null || page < 0) ? 0 : page;
-
-        Page<Employee> employeePage = employeeRepository.findAll(PageRequest.of(page, size));
         return employeePage.map(this::mapEmployeeToBasicEmployee);
     }
 
@@ -183,13 +171,55 @@ public class EmployeeService {
         return mapEmployeeToBasicEmployee(employeeRepository.save(employee));
     }
 
+    @Transactional
+    public BasicEmployeeDetailsDto updateEmployeeContact(@Valid UpdateEmployeeContactDto contactDto, Long id) {
+
+        if(id == null || id < 0)
+            throw new IllegalArgumentException("Null/negative ID");
+
+        Employee e = employeeRepository.findById(id).orElseThrow(() ->
+                new NoSuchElementException("No such employee with id #" + id));
+
+        e.setUsername(contactDto.getUsername());
+        e.setEmail(contactDto.getEmail());
+
+        return mapEmployeeToBasicEmployee(employeeRepository.save(e));
+    }
+
+    @Transactional
+    public BasicEmployeeDetailsDto updateWorkerNonContact(@Valid UpdateWorkerNonContactDto contactDto, Long id) {
+        if(id == null || id < 0)
+            throw new IllegalArgumentException("Null/negative ID");
+
+        Worker w = (Worker) employeeRepository.findById(id).orElseThrow(() ->
+                new NoSuchElementException("No such employee with id #" + id));
+
+        w.setPayRate(contactDto.getPayRate());
+        w.setPosition(contactDto.getPosition());
+        w.setBalance(contactDto.getBalance());
+        w.setRole(contactDto.getRole());
+
+        return mapEmployeeToBasicEmployee(employeeRepository.save((Employee) w));
+    }
+
+    @Transactional
+    public BasicEmployeeDetailsDto updateManagerNonContact(@Valid UpdateManagerNonContactDto contactDto, Long id) {
+        if(id == null || id < 0)
+            throw new IllegalArgumentException("Null/negative ID");
+
+        Manager m = (Manager) employeeRepository.findById(id).orElseThrow(() ->
+                new NoSuchElementException("No such employee with id #" + id));
+
+        m.setSalary(contactDto.getSalary());
+        m.setPosition(contactDto.getPosition());
+        m.setBalance(contactDto.getBalance());
+        m.setRole(contactDto.getRole());
+
+        return mapEmployeeToBasicEmployee(employeeRepository.save((Employee) m));
+    }
+
     private BasicEmployeeDetailsDto mapEmployeeToBasicEmployee(Employee e) {
-        return new BasicEmployeeDetailsDto(
-                e.getUsername(),
-                e.getPosition(),
-                e.getRole(),
-                e.getDateHired()
-        );
+        return new BasicEmployeeDetailsDto(e);
     }
 
 }

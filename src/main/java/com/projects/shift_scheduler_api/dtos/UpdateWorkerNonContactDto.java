@@ -6,8 +6,6 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public class UpdateWorkerNonContactDto {
-    @PositiveOrZero
-    private long id;
 
     @NotNull
     private Role role;
@@ -23,14 +21,6 @@ public class UpdateWorkerNonContactDto {
     @NotNull
     @Positive
     private BigDecimal payRate;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public Role getRole() {
         return role;
