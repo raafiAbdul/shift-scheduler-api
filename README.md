@@ -29,6 +29,7 @@ RESTful API built with Spring Boot, Sping Data JPA, Spring Security and PostgreS
 - Both the admin and manager can update the workers non-contact information.
 - Both roles can basic employee information (username, position, role, date hired, and pay-rate/salary).
 - Both roles cannot interact with the shift once it has reached the CLOSED state.
+- Shift state automatically updates to IN_PROGRESS if current time is within the shifts start and end times.
 
 ## Prerequisites
 - **Java Development Kit (JDK 17+)**
@@ -64,10 +65,9 @@ ADMIN_PASS = admin_password
 
 ## API Endpoints and Sample Usage
 You can check this link out for the [API Endpoints](https://shift-scheduler-api-production.up.railway.app/swagger-ui/index.html). This is the OpenAPI documentation for this API.
-If it asks you to login, use these credentials:
+If it asks you to log in, use these credentials:
 
 Username: admin
-
 Password: password
 
 ## Entity-Relationship Diagram
