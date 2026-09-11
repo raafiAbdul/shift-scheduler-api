@@ -138,7 +138,6 @@ public class Employee {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
                 ", dateHired=" + dateHired +
                 '}';
     }

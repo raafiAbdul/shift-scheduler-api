@@ -20,7 +20,7 @@ public class EmployeeShift {
     @MapsId("shiftId")
     @JoinColumn(name = "shift_id", foreignKey = @ForeignKey(
             name = "shift_fk",
-            foreignKeyDefinition = "foreign key (employee_id) references employees(id) on delete cascade"
+            foreignKeyDefinition = "foreign key (shift_id) references shifts(id) on delete cascade"
     ))
     private Shift shift;
 
