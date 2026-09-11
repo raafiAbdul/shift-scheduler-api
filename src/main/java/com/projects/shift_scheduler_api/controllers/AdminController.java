@@ -1,6 +1,5 @@
 package com.projects.shift_scheduler_api.controllers;
 
-import com.projects.shift_scheduler_api.dtos.AdminLoginDto;
 import com.projects.shift_scheduler_api.dtos.BasicEmployeeDetailsDto;
 import com.projects.shift_scheduler_api.dtos.UpdateEmployeeContactDto;
 import com.projects.shift_scheduler_api.dtos.WrapperDto;
@@ -8,6 +7,9 @@ import com.projects.shift_scheduler_api.models.Employee;
 import com.projects.shift_scheduler_api.models.Manager;
 import com.projects.shift_scheduler_api.models.Worker;
 import com.projects.shift_scheduler_api.services.EmployeeService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,22 +18,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/admin")
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Admin Endpoints")
+@Hidden
 public class AdminController {
 
     private final EmployeeService employeeService;
 
     public AdminController(EmployeeService employeeService) {
         this.employeeService = employeeService;
-    }
-
-    @PostMapping("/login")
-    public void adminLogin(@RequestBody @Valid AdminLoginDto adminLoginDto) {
-
-    }
-
-    @PostMapping("/logout")
-    public void adminLogout() {
-
     }
 
     @PostMapping("/worker")
@@ -58,9 +53,9 @@ public class AdminController {
                 .body(wrapperDto);
     }
 
-    @PutMapping("/update/worker/{id}")
+    @PutMapping("/update/worker")
     public ResponseEntity<?> updateWorker(@RequestBody @Valid Worker newWorker,
-                                          @PathVariable Long id) {
+                                          @RequestParam Long id) {
         HttpStatus status = HttpStatus.OK;
         WrapperDto<Worker> wrapperDto = new WrapperDto<>(
                 employeeService.updateWorker(id, newWorker),
@@ -71,9 +66,9 @@ public class AdminController {
                 .body(wrapperDto);
     }
 
-    @PutMapping("update/manager/{id}")
+    @PutMapping("update/manager")
     public ResponseEntity<?> updateManager(@RequestBody @Valid Manager newManager,
-                                           @PathVariable Long id) {
+                                           @RequestParam Long id) {
         HttpStatus status = HttpStatus.OK;
         WrapperDto<Manager> wrapperDto = new WrapperDto<>(
                 employeeService.updateManager(id, newManager),
@@ -84,8 +79,8 @@ public class AdminController {
                 .body(wrapperDto);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable Long id) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteEmployeeById(@RequestParam Long id) {
         HttpStatus status = HttpStatus.NO_CONTENT;
         WrapperDto<?> wrapperDto = new WrapperDto<>(
                 null,
@@ -96,7 +91,7 @@ public class AdminController {
         return ResponseEntity.status(status).body(wrapperDto);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<?> deleteAll() {
         HttpStatus status = HttpStatus.NO_CONTENT;
         WrapperDto<?> wrapperDto = new WrapperDto<>(
@@ -107,6 +102,7 @@ public class AdminController {
         employeeService.deleteAll();
         return ResponseEntity.status(status).body(wrapperDto);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
@@ -119,7 +115,7 @@ public class AdminController {
         return ResponseEntity.status(status).body(wrapperDto);
     }
 
-    @GetMapping("/{page}")
+    @GetMapping("/all/{page}")
     public ResponseEntity<?> getAll(@RequestParam(required = false) Integer size,
                                     @PathVariable Integer page) {
         HttpStatus status = HttpStatus.OK;

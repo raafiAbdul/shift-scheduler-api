@@ -4,9 +4,10 @@ import com.projects.shift_scheduler_api.dtos.ErrorDetailsDto;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -17,7 +18,6 @@ import java.util.NoSuchElementException;
 public class ExceptionControllerAdvice {
 
     @ExceptionHandler(NullPointerException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleNullPointerException(NullPointerException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
@@ -26,7 +26,6 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(NoSuchElementException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException e) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
@@ -35,7 +34,6 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(IllegalStateException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleIllegalStateException(IllegalStateException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
@@ -44,7 +42,6 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
@@ -53,7 +50,6 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorDetailsDto<Map<String, String>> ed = new ErrorDetailsDto<>(
@@ -62,7 +58,6 @@ public class ExceptionControllerAdvice {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         Map<String, String> fieldErrors = new HashMap<>();
@@ -74,8 +69,23 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.status(status).body(ed);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handleAuthenticationException(AuthenticationException e) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
+                "AuthenticationException", status.value(), e.getMessage());
+        return ResponseEntity.status(status).body(ed);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
+                "AccessDeniedException", status.value(), e.getMessage());
+        return ResponseEntity.status(status).body(ed);
+    }
+
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<?> handleException(Exception e) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         ErrorDetailsDto<String> ed = new ErrorDetailsDto<>(
