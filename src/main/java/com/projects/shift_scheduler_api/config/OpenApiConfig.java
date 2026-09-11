@@ -20,10 +20,15 @@ import org.springframework.context.annotation.Bean;
                 description = "A  RESTful API for scheduling shifts using " +
                         "Spring Boot, Spring Data JPA and PostgreSQL."
         ),
-        servers = @Server(
-                description = "Local ENV",
-                url = "http://localhost:8081"
-        )
+        servers = {
+                @Server(
+                        description = "Local ENV",
+                        url = "http://localhost:8081"
+                ),
+                @Server(
+                        description = "Deployed ENV"
+                )
+        }
 )
 @SecurityScheme(
         name = "bearerAuth",
@@ -31,10 +36,12 @@ import org.springframework.context.annotation.Bean;
         scheme = "bearer",
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER,
-        description = "Uses JWT Bearer token. Token is provided in the /api/v1/employee/login path. " +
-                "You only need to put in your token, no need for \"Bearer ...\". Paste the admin JWT to " +
-                "get access to the admin controller endpoints. Your admin credentials are stored in the " +
-                "ADMIN_USER and ADMIN_PASS environment variables."
+        description = """
+                Uses JWT Bearer token. Token is provided in the /api/v1/employee/login path. \
+                You only need to put in your token, no need for "Bearer ...". Paste the admin JWT to \
+                get access to the admin controller endpoints.\s
+                Admin Username: admin\s
+                Admin Password: password"""
 )
 public class OpenApiConfig {
     @Bean
