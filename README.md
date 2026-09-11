@@ -65,7 +65,7 @@ ADMIN_PASS = admin_password
 
 ## API Endpoints and Sample Usage
 You can check this link out for the [API Endpoints](https://shift-scheduler-api-production.up.railway.app/swagger-ui/index.html). This is the OpenAPI documentation for this API.
-If it asks you to log in, use these credentials:\
+If it asks you to log in, use these credentials:
 
 Username: admin\
 Password: password
