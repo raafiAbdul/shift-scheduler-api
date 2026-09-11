@@ -49,7 +49,7 @@ public interface ShiftRepository extends CrudRepository<Shift, Long>,
 
     @Query(value = "select s.id from Shift s where " +
             "s.startTime <= :end and s.endTime >= :start " +
-            "and s.endTime <= :end and s.state != 'CLOSED'")
+            "and s.endTime <= :end")
     List<Long> findNotClosedIdsByTimeInBetweenExceptFuture(
             @Param(value = "start")OffsetDateTime start,
             @Param(value = "end") OffsetDateTime end);

@@ -28,13 +28,18 @@ public class UpdateStateScheduler {
 
         List<Long> shiftIdList = shiftRepository.findNotClosedIdsByTimeInBetweenExceptFuture(daysAgo, now);
 
-        if(shiftIdList.isEmpty())
-            return;
-
         List<Shift> shiftList = shiftRepository.findFullyHydratedShiftById(shiftIdList);
 
-        shiftList.forEach(s -> {
-            s.setState(ShiftState.CLOSED);
+        for(Shift s : shiftList) {
+
+            if(now.isAfter(s.getStartTime()) && now.isBefore(s.getEndTime())) {
+                s.setState(ShiftState.IN_PROGRESS);
+                continue;
+            }
+
+            if(now.isAfter(s.getEndTime()))
+                s.setState(ShiftState.CLOSED);
+
             for(EmployeeShift es : s.getEmployeeShifts()) {
                 if(es.getClockedOut() == null)
                     continue;
@@ -45,7 +50,7 @@ public class UpdateStateScheduler {
                     w.setBalance(w.getBalance().add(hoursWorked.multiply(earnings)));
                 }
             }
-        });
+        }
 
     }
 }

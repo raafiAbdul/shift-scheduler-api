@@ -9,6 +9,7 @@ public enum Role {
             Permissions.SHIFT_UPDATE,
             Permissions.SHIFT_DELETE,
             Permissions.USER_READ,
+            Permissions.USER_UPDATE_CONTACT,
             Permissions.WORKER_UPDATE_NONCONTACT,
             Permissions.MANAGER_UPDATE_NONCONTACT
     )),
