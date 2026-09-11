@@ -33,7 +33,7 @@ public class ShiftService {
 
     @Transactional
     public ShiftDto addEmployeeToShift(Long employeeId, Long shiftId) {
-        if(employeeId == null || shiftId == null || employeeId < 0 || shiftId < 0)
+        if(employeeId == null || shiftId == null || employeeId <= 0 || shiftId <= 0)
             throw new IllegalArgumentException("Null or invalid shift or employee Id");
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() ->
@@ -50,7 +50,7 @@ public class ShiftService {
 
     @Transactional
     public void removeEmployeeFromShift(Long employeeId, Long shiftId) {
-        if(employeeId == null || shiftId == null || employeeId < 0 || shiftId < 0)
+        if(employeeId == null || shiftId == null || employeeId <= 0 || shiftId <= 0)
             throw new IllegalArgumentException("Null or invalid shift or employee Id");
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow(() ->
@@ -84,7 +84,7 @@ public class ShiftService {
 
     @Transactional
     public ShiftDto updateShift(Long id, @Valid CreateOrUpdateShiftDto updateShiftDto) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null or invalid Id");
 
         Shift s = shiftRepository.findById(id).orElseThrow(() ->
@@ -114,7 +114,7 @@ public class ShiftService {
 
     @Transactional
     public void deleteShift(Long id) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null or invalid Id");
 
         shiftRepository.deleteById(id);
@@ -126,7 +126,7 @@ public class ShiftService {
     }
 
     public ShiftDto findById(Long id) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null or invalid Id");
 
         Shift shift = shiftRepository.findById(id).orElseThrow(() ->

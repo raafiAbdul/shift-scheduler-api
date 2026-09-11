@@ -23,7 +23,7 @@ public class EmployeeShiftService {
     public void clockIn(Long shiftId, Long employeeId) {
         if(shiftId == null || employeeId == null)
             throw new IllegalArgumentException("ID/s cannot be null");
-        if(shiftId < 0 || employeeId < 0)
+        if(shiftId <= 0 || employeeId <= 0)
             throw new IllegalArgumentException("ID/s cannot be negative");
 
         EmployeeShift es = employeeShiftRepository.findById(new EmployeeShiftKey(shiftId, employeeId))
@@ -40,7 +40,7 @@ public class EmployeeShiftService {
 
         if(shiftId == null || employeeId == null)
             throw new IllegalArgumentException("ID/s cannot be null");
-        if(shiftId < 0 || employeeId < 0)
+        if(shiftId <= 0 || employeeId <= 0)
             throw new IllegalArgumentException("ID/s cannot be negative");
 
         EmployeeShift es = employeeShiftRepository.findById(new EmployeeShiftKey(shiftId, employeeId))

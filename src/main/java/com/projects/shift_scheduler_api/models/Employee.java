@@ -18,6 +18,7 @@ public class Employee {
     @NotBlank
     @NotNull
     @Size(min = 3, max = 30)
+    @Column(unique = true)
     private String username;
 
     @Email(
@@ -26,12 +27,13 @@ public class Employee {
     )
     @NotNull
     @NotBlank
+    @Column(unique = true)
     private String email;
 
     @NotNull
     @NotBlank
     @Size(min = 8, max = 100)
-    @Pattern(regexp = "(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*\\p{P})[\\w[\\p{P}]]{8,}",
+    @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!?@#$%^&+=])(?=\\S+$).{8,}",
             message = "Should contain punctuation, a number, lower and upper case letters.")
     private String password;
 
@@ -42,7 +44,7 @@ public class Employee {
     private String position;
 
     @Column(name = "date_hired")
-    private LocalDate dateHired;
+    private LocalDate dateHired = LocalDate.now();
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EmployeeShift> employeeShifts = new ArrayList<>();

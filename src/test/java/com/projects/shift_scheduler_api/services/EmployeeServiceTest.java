@@ -7,10 +7,13 @@ import com.projects.shift_scheduler_api.models.Role;
 import com.projects.shift_scheduler_api.models.Worker;
 import com.projects.shift_scheduler_api.repositories.EmployeeRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -19,15 +22,19 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class SecurityEmployeeServiceTest extends InitializeServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EmployeeServiceTest extends InitializeServiceTest {
     @Mock
     EmployeeRepository employeeRepository;
+    @Mock
+    PasswordEncoder encoder;
     @InjectMocks
     EmployeeService employeeService;
 
     @Test
     void shouldReturn_TheSame_ManagerUsernameAndEmail() {
         when(employeeRepository.save(m1)).thenReturn(m1);
+        when(encoder.encode(m1.getPassword())).thenReturn("");
         Manager m2 = employeeService.createManager(m1);
         assertAll(
                 () -> assertEquals("bob_manager", m2.getUsername()),
@@ -43,6 +50,7 @@ class SecurityEmployeeServiceTest extends InitializeServiceTest {
     @Test
     void shouldReturn_TheSame_WorkerUsernameAndEmail() {
         when(employeeRepository.save(w1)).thenReturn(w1);
+        when(encoder.encode(w1.getPassword())).thenReturn("asdfasdg");
         Worker w1_2 = employeeService.createWorker(w1);
         assertAll(
                 () -> assertEquals("carol_w", w1_2.getUsername()),
@@ -67,35 +75,41 @@ class SecurityEmployeeServiceTest extends InitializeServiceTest {
 
     @Test
     void updateWorker_ShouldThrow_IllegalArgumentException() {
-        when(employeeRepository.findById(2L))
+        Long id = 2L;
+        when(employeeRepository.findById(id))
                 .thenReturn(Optional.of(m1));
-        assertThrows(IllegalArgumentException.class, () -> employeeService.updateWorker(2L, new Worker()));
+        assertThrows(IllegalArgumentException.class, () -> employeeService.updateWorker(id, new Worker()));
     }
 
     @Test
     void updateManager_ShouldThrow_IllegalArgumentException() {
-        when(employeeRepository.findById(2L))
+        Long id = 2L;
+        when(employeeRepository.findById(id))
                 .thenReturn(Optional.of(w2));
-        assertThrows(IllegalArgumentException.class, () -> employeeService.updateManager(2L, new Manager()));
+        assertThrows(IllegalArgumentException.class, () -> employeeService.updateManager(id, new Manager()));
     }
 
     @Test
     void updateManager_happyFlow() {
-        when(employeeRepository.findById(2L))
+        Long id = 2L;
+        when(employeeRepository.findById(id))
                 .thenReturn(Optional.of(m1));
         Manager m2 = m1;
         m2.setEmail("cool.cars@store.com");
+        when(encoder.encode(m2.getPassword())).thenReturn("asteaf");
         when(employeeRepository.save(any(Manager.class))).thenReturn(m2);
-        Employee m3 = employeeService.updateManager(2L, m2);
+        Employee m3 = employeeService.updateManager(id, m2);
         assertEquals("cool.cars@store.com", m3.getEmail());
     }
 
     @Test
     void updateWorker_happyFlow() {
-        when(employeeRepository.findById(2L))
-                .thenReturn(Optional.of(w2));
+        Long id = 2L;
+        when(employeeRepository.findById(id))
+                .thenReturn(Optional.of(w1));
         when(employeeRepository.save(any(Worker.class))).thenReturn(w1);
-        Worker w1_2 = employeeService.updateWorker(2L, w1);
+        when(encoder.encode(w1.getPassword())).thenReturn("");
+        Worker w1_2 = employeeService.updateWorker(id, w1);
         verify(employeeRepository, times(1)).save(w1);
         assertEquals("carol_worker@company.com", w1_2.getEmail());
     }
@@ -201,7 +215,8 @@ class SecurityEmployeeServiceTest extends InitializeServiceTest {
     void registerEmployee_resultsInManagerType() {
         RegisterDto registerDto = new RegisterDto();
         registerDto.setRole(Role.MANAGER);
-
+        registerDto.setPassword("");
+        when(encoder.encode(registerDto.getPassword())).thenReturn("");
         when(employeeRepository.save(any(Employee.class))).thenReturn(new Manager());
         assertInstanceOf(BasicEmployeeDetailsDto.class, employeeService.registerEmployee(registerDto));
     }
@@ -210,8 +225,10 @@ class SecurityEmployeeServiceTest extends InitializeServiceTest {
     void registerEmployee_resultsInWorkerType() {
         RegisterDto registerDto = new RegisterDto();
         registerDto.setRole(Role.WORKER);
+        registerDto.setPassword("");
 
         when(employeeRepository.save(any(Employee.class))).thenReturn(new Worker());
+        when(encoder.encode(registerDto.getPassword())).thenReturn("asdga");
         assertInstanceOf(BasicEmployeeDetailsDto.class, employeeService.registerEmployee(registerDto));
     }
 

@@ -23,7 +23,7 @@ public interface EmployeeRepository extends CrudRepository<Employee, Long>,
     @Query("select e from Employee e where lower(e.role) like lower(:role)")
     Page<Employee> findByRole(String role, Pageable pageable);
 
-    @Query(value = "delete from employee_shift; delete from employees", nativeQuery = true)
+    @Query(value = "delete from employee_shift; delete from employees where role != 'ADMIN'", nativeQuery = true)
     @Modifying
     void deleteBulk();
 

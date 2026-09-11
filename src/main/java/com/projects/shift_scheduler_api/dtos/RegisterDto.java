@@ -21,7 +21,10 @@ public class RegisterDto {
     @NotNull
     @NotBlank
     @Size(min = 8, max = 100)
-    @Pattern(regexp = "(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*\\p{P})[\\w[\\p{P}]]{8,}",
+    // Source - https://stackoverflow.com/a/3802238
+    // Posted by Tomalak, modified by community. See post 'Timeline' for change history
+    // Retrieved 2026-09-10, License - CC BY-SA 3.0
+    @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!?@#$%^&+=])(?=\\S+$).{8,}",
             message = "Should contain punctuation, a number, lower and upper case letters.")
     private String password;
 

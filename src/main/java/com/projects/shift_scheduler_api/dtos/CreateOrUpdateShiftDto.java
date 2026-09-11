@@ -1,13 +1,14 @@
 package com.projects.shift_scheduler_api.dtos;
 
 import com.projects.shift_scheduler_api.models.ShiftState;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class CreateOrUpdateShiftDto {
     @NotNull @NotBlank private String description;
-    @Size(min = 1) private int requiredEmployeeCount;
+    @Min(value = 1) private int requiredEmployeeCount;
     @NotNull private ShiftDateDto startTime;
     @NotNull private ShiftDateDto endTime;
     @NotNull private ShiftState state = ShiftState.UPCOMING;

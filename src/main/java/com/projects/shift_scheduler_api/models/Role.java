@@ -9,33 +9,32 @@ public enum Role {
             Permissions.SHIFT_UPDATE,
             Permissions.SHIFT_DELETE,
             Permissions.USER_READ,
-            Permissions.USER_WRITE,
-            Permissions.USER_UPDATE,
-            Permissions.USER_DELETE,
-            Permissions.USER_UPDATE_CONTACT,
-            Permissions.USER_READ_SELF,
             Permissions.WORKER_UPDATE_NONCONTACT,
-            Permissions.MANAGER_UPDATE_NONCONTACT,
-            Permissions.SHIFT_CLAIM,
-            Permissions.SHIFT_SWAP_REQUEST,
-            Permissions.USER_READ_BASIC_DETAILS
+            Permissions.MANAGER_UPDATE_NONCONTACT
     )),
     WORKER(Set.of(
             Permissions.SHIFT_READ,
             Permissions.SHIFT_CLAIM,
-            Permissions.SHIFT_SWAP_REQUEST,
+            Permissions.SHIFT_DROP,
             Permissions.USER_READ_SELF,
+            Permissions.USER_READ,
             Permissions.USER_UPDATE_CONTACT,
-            Permissions.USER_READ_BASIC_DETAILS
+            Permissions.CLOCK_IN,
+            Permissions.CLOCK_OUT
     )),
     MANAGER(Set.of(
+            Permissions.SHIFT_DROP,
             Permissions.SHIFT_READ,
             Permissions.SHIFT_WRITE,
             Permissions.SHIFT_UPDATE,
+            Permissions.SHIFT_CLAIM,
             Permissions.SHIFT_DELETE,
             Permissions.USER_READ,
+            Permissions.USER_READ_SELF,
             Permissions.WORKER_UPDATE_NONCONTACT,
-            Permissions.USER_READ_BASIC_DETAILS
+            Permissions.USER_UPDATE_CONTACT,
+            Permissions.CLOCK_IN,
+            Permissions.CLOCK_OUT
     ));
 
     private final Set<Permissions> permissions;

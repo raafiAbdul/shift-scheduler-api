@@ -6,20 +6,35 @@ import com.projects.shift_scheduler_api.models.Manager;
 import com.projects.shift_scheduler_api.models.Role;
 import com.projects.shift_scheduler_api.models.Worker;
 import com.projects.shift_scheduler_api.repositories.EmployeeRepository;
+import com.projects.shift_scheduler_api.security.services.JwtService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
 @Service
 public class EmployeeService {
 
+    private final JwtService jwtService;
+    private final AuthenticationManager authManager;
+    private final PasswordEncoder encoder;
     private final EmployeeRepository employeeRepository;
 
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(JwtService jwtService, AuthenticationManager authManager, PasswordEncoder encoder, EmployeeRepository employeeRepository) {
+        this.jwtService = jwtService;
+        this.authManager = authManager;
+        this.encoder = encoder;
         this.employeeRepository = employeeRepository;
     }
 
@@ -27,6 +42,10 @@ public class EmployeeService {
     public Manager createManager(@Valid Manager manager) {
         if(manager.getRole() == Role.ADMIN)
             throw new IllegalArgumentException("Can't create another admin");
+
+        String encodedPassword = encoder.encode(manager.getPassword());
+        manager.setPassword(encodedPassword);
+
         return employeeRepository.save(manager);
     }
 
@@ -34,20 +53,27 @@ public class EmployeeService {
     public Worker createWorker(@Valid Worker worker) {
         if(worker.getRole() == Role.ADMIN)
             throw new IllegalArgumentException("Can't create another admin");
+
+        String encodedPassword = encoder.encode(worker.getPassword());
+        worker.setPassword(encodedPassword);
+
         return employeeRepository.save(worker);
     }
 
     @Transactional
-    public Worker updateWorker(long id, @Valid Worker employee) {
+    public Worker updateWorker(Long id, @Valid Worker employee) {
         Employee oldEmployee = employeeRepository.findById(id).orElseThrow(() ->
                 new NoSuchElementException("No such worker with id #" + id));
         if(!(oldEmployee.getRole() == Role.WORKER)) {
             throw new IllegalArgumentException("Expected an employee with MANAGER role");
         }
+
+        String encodedPassword = encoder.encode(employee.getPassword());
+
         Worker old = (Worker) oldEmployee;
         old.setUsername(employee.getUsername());
         old.setEmail(employee.getEmail());
-        old.setPassword(employee.getPassword());
+        old.setPassword(encodedPassword);
         old.setRole(employee.getRole());
         old.setPosition(employee.getPosition());
         old.setDateHired(employee.getDateHired());
@@ -58,16 +84,19 @@ public class EmployeeService {
     }
 
     @Transactional
-    public Manager updateManager(long id, @Valid Manager employee) {
+    public Manager updateManager(Long id, @Valid Manager employee) {
         Employee oldEmployee = employeeRepository.findById(id).orElseThrow(() ->
                 new NoSuchElementException("No such worker with id #" + id));
         if(!(oldEmployee.getRole() == Role.MANAGER)) {
             throw new IllegalArgumentException("Expected an employee with MANAGER role");
         }
+
+        String encodedPassword = encoder.encode(employee.getPassword());
+
         Manager old = (Manager) oldEmployee;
         old.setUsername(employee.getUsername());
         old.setEmail(employee.getEmail());
-        old.setPassword(employee.getPassword());
+        old.setPassword(encodedPassword);
         old.setRole(employee.getRole());
         old.setPosition(employee.getPosition());
         old.setDateHired(employee.getDateHired()); // expected format yyyy-MM-dd
@@ -142,7 +171,7 @@ public class EmployeeService {
     }
 
     public BasicEmployeeDetailsDto findById(Long id) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null/negative ID");
 
         Employee employee = employeeRepository.findById(id).orElseThrow(() ->
@@ -163,10 +192,14 @@ public class EmployeeService {
             throw new NoSuchElementException("No such role");
         }
 
+        String encodedPassword = encoder.encode(registerDto.getPassword());
+        registerDto.setPassword(encodedPassword);
+
         employee.setUsername(registerDto.getUsername());
         employee.setEmail(registerDto.getEmail());
         employee.setPassword(registerDto.getPassword());
         employee.setRole(registerDto.getRole());
+        employee.setDateHired(LocalDate.now());
 
         return mapEmployeeToBasicEmployee(employeeRepository.save(employee));
     }
@@ -174,7 +207,7 @@ public class EmployeeService {
     @Transactional
     public BasicEmployeeDetailsDto updateEmployeeContact(@Valid UpdateEmployeeContactDto contactDto, Long id) {
 
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null/negative ID");
 
         Employee e = employeeRepository.findById(id).orElseThrow(() ->
@@ -188,7 +221,7 @@ public class EmployeeService {
 
     @Transactional
     public BasicEmployeeDetailsDto updateWorkerNonContact(@Valid UpdateWorkerNonContactDto contactDto, Long id) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null/negative ID");
 
         Worker w = (Worker) employeeRepository.findById(id).orElseThrow(() ->
@@ -204,7 +237,7 @@ public class EmployeeService {
 
     @Transactional
     public BasicEmployeeDetailsDto updateManagerNonContact(@Valid UpdateManagerNonContactDto contactDto, Long id) {
-        if(id == null || id < 0)
+        if(id == null || id <= 0)
             throw new IllegalArgumentException("Null/negative ID");
 
         Manager m = (Manager) employeeRepository.findById(id).orElseThrow(() ->
@@ -216,6 +249,17 @@ public class EmployeeService {
         m.setRole(contactDto.getRole());
 
         return mapEmployeeToBasicEmployee(employeeRepository.save((Employee) m));
+    }
+
+    public String verify(@Valid LoginDto loginDto) {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDto.getUsername(), loginDto.getPassword()));
+
+        if(!authentication.isAuthenticated())
+            throw new BadCredentialsException("Invalid credentials");
+
+        return jwtService.generateToken(loginDto.getUsername());
     }
 
     private BasicEmployeeDetailsDto mapEmployeeToBasicEmployee(Employee e) {
