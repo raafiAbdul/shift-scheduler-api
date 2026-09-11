@@ -40,8 +40,8 @@ import org.springframework.context.annotation.Bean;
         description = """
                 Uses JWT Bearer token. Token is provided in the /api/v1/employee/login path. \
                 You only need to put in your token, no need for "Bearer ...". Paste the admin JWT to \
-                get access to the admin controller endpoints.\s
-                Admin Username: admin\s
+                get access to the admin controller endpoints.\n
+                Admin Username: admin\n
                 Admin Password: password"""
 )
 public class OpenApiConfig {
