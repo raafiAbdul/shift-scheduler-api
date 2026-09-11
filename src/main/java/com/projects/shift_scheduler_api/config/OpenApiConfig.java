@@ -38,26 +38,10 @@ import org.springframework.context.annotation.Bean;
         bearerFormat = "JWT",
         in = SecuritySchemeIn.HEADER,
         description = """
-                Uses JWT Bearer token. Token is provided in the /api/v1/employee/login path. \
-                You only need to put in your token, no need for "Bearer ...". Paste the admin JWT to \
-                get access to the admin controller endpoints.\n
-                Admin Username: admin\n
-                Admin Password: password"""
+                Uses JWT Bearer token. Token is provided in the /api/v1/employee/login path. \n
+                You only need to put in your token, no need for "Bearer ...".
+                """
 )
 public class OpenApiConfig {
-    @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("public-api")
-                .pathsToMatch("/api/v1/employee/**", "/api/v1/shifts/**")
-                .build();
-    }
 
-    @Bean
-    public GroupedOpenApi adminApi() {
-        return GroupedOpenApi.builder()
-                .group("admin-api")
-                .pathsToMatch("/api/v1/admin/**")
-                .build();
-    }
 }
