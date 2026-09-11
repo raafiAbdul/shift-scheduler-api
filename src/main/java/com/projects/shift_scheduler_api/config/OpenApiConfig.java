@@ -26,7 +26,8 @@ import org.springframework.context.annotation.Bean;
                         url = "http://localhost:8081"
                 ),
                 @Server(
-                        description = "Deployed ENV"
+                        description = "Deployed ENV",
+                        url = "https://shift-scheduler-api-production.up.railway.app"
                 )
         }
 )
